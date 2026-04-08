@@ -34,13 +34,11 @@ module alu
   input        and_i,
   input        or_i,
   input        xor_i,
-  input        shf_L_a,
-  input        shf_L_b,
   output logic [WORD_LENGTH*2-1 : 0] c); 
   
   reg [7:0] add_tmp_reg, tmp_2c;
   // Define our states
-   typedef enum {IDLE, START, ADD, SUB, MUL, DIV, AND_op, OR_op, XOR_op, Shift_left_a, Shift_left_b}  alu_state;
+   typedef enum {IDLE, START, ADD, SUB, MUL, DIV, AND_op, OR_op, XOR_op}  alu_state;
    alu_state current_state = IDLE;
    alu_state next_state    = IDLE;
    
@@ -105,15 +103,7 @@ module alu
                // XOR Op //
                end else if ((valid) && (xor_i)) begin
 					   $display("Time=%t, -->> bitwise XOR <<--", $time);
-                  next_state = XOR_op;	 	
-	            // Shift Left Op //
-               end else if ((valid) && (shf_L_a)) begin
-					   $display("Time=%t, -->> bitwise Shift Left a <<--", $time);
-                  next_state = Shift_left_a;	 
-               // Shift Left Op //
-               end else if ((valid) && (shf_L_b)) begin
-					   $display("Time=%t, -->> bitwise Shift Left b <<--", $time);
-                  next_state = Shift_left_b;							
+                  next_state = XOR_op;	 				  
                end else begin
 			       c <= 8'h00; 
 			       next_state = IDLE;
@@ -124,7 +114,7 @@ module alu
 			   
           ADD  :
             begin
-                  c <= add_tmp_reg; 
+                  c <= a + b; 
                   next_state = IDLE;
                end
 			   
@@ -161,18 +151,7 @@ module alu
              begin
                   c <= a^b; 
                   next_state = IDLE;
-               end				
-	       /////////////////////////
-          Shift_left_a  :
-             begin
-                  c <= a << 1; 
-                  next_state = IDLE;
-               end			
-	       Shift_left_b  :
-             begin
-                  c <= b << 1; 
-                  next_state = IDLE;
-               end							
+               end					   
           default:
 			   begin
             next_state = current_state;
@@ -184,3 +163,25 @@ module alu
 
 endmodule
 
+//----------------------------------------------------------------------
+// Author : Ahmed Asim Ghouri
+// Date : 27/03/2026
+// Interface for ALU
+//-------------------------------------------------------------------------
+interface intf_alu#(parameter WORD_LENGTH = 4)
+   (input logic clk,reset);
+  
+  //declaring the signals
+  logic       valid;
+  logic       add_i;
+  logic       mul_i;
+  logic       sub_i;
+  logic       div_i;
+  logic       and_i;
+  logic       or_i;
+  logic       xor_i;
+  logic [WORD_LENGTH-1:0] a;
+  logic [WORD_LENGTH-1:0] b;
+  logic [WORD_LENGTH*2-1:0] c;
+  
+endinterface
